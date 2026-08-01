@@ -1,0 +1,27 @@
+package com.utn.gestioninmobiliaria.controller;
+import com.utn.gestioninmobiliaria.dto.PagoRequestDTO;
+import com.utn.gestioninmobiliaria.dto.PagoResponseDTO;
+import com.utn.gestioninmobiliaria.service.PagoService;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/pagos")
+public class PagoController {
+    private final PagoService pagoService;
+
+    public PagoController(PagoService pagoService) {
+        this.pagoService = pagoService;
+    }
+
+    @GetMapping
+    public List<PagoResponseDTO> listarTodos() {
+        return pagoService.obtenerTodos();
+    }
+
+    @PostMapping
+    public PagoResponseDTO crearPago(@Valid @RequestBody PagoRequestDTO requestDTO) {
+        return pagoService.guardar(requestDTO);
+    }
+}

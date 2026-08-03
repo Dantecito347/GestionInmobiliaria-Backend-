@@ -35,4 +35,17 @@ public class PagoService {
         Pago pagoGuardado = pagoRepository.save(pago);
         return pagoMapper.toResponseDTO(pagoGuardado);
     }
+
+    public PagoResponseDTO actualizar(Integer id, PagoRequestDTO requestDTO) {
+    Pago pagoExistente = pagoRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Pago no encontrado con ID: " + id));
+
+    Contrato contrato = contratoRepository.findById(requestDTO.getIdContrato())
+        .orElseThrow(() -> new RuntimeException("Contrato no encontrado con ID: " + requestDTO.getIdContrato()));
+    pagoMapper.updateEntityFromDto(requestDTO, pagoExistente);
+    pagoExistente.setContrato(contrato);
+
+    Pago pagoGuardado = pagoRepository.save(pagoExistente);
+    return pagoMapper.toResponseDTO(pagoGuardado);
+    }
 }

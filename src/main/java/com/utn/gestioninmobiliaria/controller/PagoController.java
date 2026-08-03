@@ -3,6 +3,8 @@ import com.utn.gestioninmobiliaria.dto.PagoRequestDTO;
 import com.utn.gestioninmobiliaria.dto.PagoResponseDTO;
 import com.utn.gestioninmobiliaria.service.PagoService;
 import jakarta.validation.Valid;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -24,4 +26,11 @@ public class PagoController {
     public PagoResponseDTO crearPago(@Valid @RequestBody PagoRequestDTO requestDTO) {
         return pagoService.guardar(requestDTO);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PagoResponseDTO> actualizarPago(@PathVariable Integer id, @Valid @RequestBody PagoRequestDTO requestDTO) {
+        PagoResponseDTO pagoActualizado = pagoService.actualizar(id, requestDTO);
+        return ResponseEntity.ok(pagoActualizado);
+    }
+
 }

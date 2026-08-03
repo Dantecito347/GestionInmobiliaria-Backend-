@@ -8,6 +8,9 @@ import com.utn.gestioninmobiliaria.repository.PersonaRepository;
 import com.utn.gestioninmobiliaria.entity.Persona;
 import com.utn.gestioninmobiliaria.repository.PropiedadRepository;
 import com.utn.gestioninmobiliaria.entity.Propiedad;
+import com.utn.gestioninmobiliaria.repository.TipoAjusteRepository;
+import com.utn.gestioninmobiliaria.entity.TipoAjuste;
+
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -16,12 +19,14 @@ public class ContratoService {
     private final ContratoRepository contratoRepository;
     private final PersonaRepository personaRepository;
     private final PropiedadRepository propiedadRepository;
+    private final TipoAjusteRepository tipoAjusteRepository;
     private final ContratoMapper contratoMapper;
 
-    public ContratoService(ContratoRepository contratoRepository, PersonaRepository personaRepository, PropiedadRepository propiedadRepository, ContratoMapper contratoMapper){
+    public ContratoService(ContratoRepository contratoRepository, PersonaRepository personaRepository, PropiedadRepository propiedadRepository, TipoAjusteRepository tipoAjusteRepository, ContratoMapper contratoMapper){
         this.contratoRepository = contratoRepository;
         this.personaRepository = personaRepository;
         this.propiedadRepository = propiedadRepository;
+        this.tipoAjusteRepository = tipoAjusteRepository;
         this.contratoMapper = contratoMapper;
     }
 
@@ -38,12 +43,41 @@ public class ContratoService {
         Propiedad propiedad = propiedadRepository.findById(requestDTO.getIdPropiedad())
                               .orElseThrow(() -> new IllegalArgumentException("Propiedad no encontrada con ID: " + requestDTO.getIdPropiedad()));
         
+        TipoAjuste ajuste = tipoAjusteRepository.findById(requestDTO.getIdAjuste())
+        .orElseThrow(() -> new RuntimeException("Tipo de ajuste no encontrado"));                      
+        
         contrato.setInquilino(inquilino);
         contrato.setPropiedad(propiedad);
-        
+        contrato.setTipoAjuste(ajuste);
+
         Contrato contratoGuardado = contratoRepository.save(contrato);
         return contratoMapper.toResponseDTO(contratoGuardado);
 
+    }
+
+    public ContratoResponseDTO actualizar(Integer id, ContratoRequestDTO requestDTO) {
+        Contrato contratoExistente = contratoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Contrato no encontrado con ID: " + id));
+        contratoMapper.updateEntityFromDTO(requestDTO, contratoExistente);
+        Persona inquilino = personaRepository.findById(requestDTO.getIdInquilino())
+                .orElseThrow(() -> new IllegalArgumentException("Inquilino no encontrado con ID: " + requestDTO.getIdInquilino()));     
+        Propiedad propiedad = propiedadRepository.findById(requestDTO.getIdPropiedad())
+                .orElseThrow(() -> new IllegalArgumentException("Propiedad no encontrada con ID: " + requestDTO.getIdPropiedad()));
+        TipoAjuste ajuste = tipoAjusteRepository.findById(requestDTO.getIdAjuste())
+                .orElseThrow(() -> new RuntimeException("Tipo de ajuste no encontrado")); 
+
+        contratoExistente.setInquilino(inquilino);
+        contratoExistente.setPropiedad(propiedad);
+        contratoExistente.setTipoAjuste(ajuste);
+        Contrato contratoGuardado = contratoRepository.save(contratoExistente);
+        return contratoMapper.toResponseDTO(contratoGuardado);
+    }
+
+    public void eliminar(Integer id) {
+        if (!contratoRepository.existsById(id)) {
+            throw new IllegalArgumentException("Contrato no encontrado con ID: " + id);
+        }
+        contratoRepository.deleteById(id);
     }
 
 }

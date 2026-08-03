@@ -22,9 +22,6 @@ public class Contrato {
     @Column(name = "valor_inicial", nullable = false, precision = 12, scale = 2)
     private BigDecimal valorInicial;
 
-    @Column(name = "id_ajuste")
-    private Integer idAjuste;
-
     @Column(name = "estado", length = 50)
     private String estado;
 
@@ -36,5 +33,7 @@ public class Contrato {
     @JoinColumn(name = "id_propiedad", nullable = false)
     private Propiedad propiedad;
 
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_ajuste")
+    private TipoAjuste tipoAjuste;
 }

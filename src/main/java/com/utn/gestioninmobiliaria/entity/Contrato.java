@@ -2,6 +2,9 @@ package com.utn.gestioninmobiliaria.entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Data;
 
 @Entity
@@ -36,4 +39,7 @@ public class Contrato {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_ajuste")
     private TipoAjuste tipoAjuste;
+
+    @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Obligacion> obligaciones = new ArrayList<>();
 }

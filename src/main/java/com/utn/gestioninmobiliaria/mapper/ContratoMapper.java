@@ -2,6 +2,9 @@ package com.utn.gestioninmobiliaria.mapper;
 import com.utn.gestioninmobiliaria.dto.ContratoRequestDTO;
 import com.utn.gestioninmobiliaria.dto.ContratoResponseDTO;
 import com.utn.gestioninmobiliaria.entity.Contrato;
+import com.utn.gestioninmobiliaria.entity.Obligacion;
+
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -29,4 +32,13 @@ public interface ContratoMapper {
     @Mapping(target = "propiedad", ignore = true)
     @Mapping(target = "tipoAjuste", ignore = true)
     void updateEntityFromDTO(ContratoRequestDTO requestDTO, @MappingTarget Contrato contrato);
+
+    @AfterMapping
+    default void vincularObligaciones(@MappingTarget Contrato contrato) {
+        if (contrato.getObligaciones() != null) {
+            for (Obligacion o : contrato.getObligaciones()) {
+                o.setContrato(contrato);
+            }
+        }
+    }
 }

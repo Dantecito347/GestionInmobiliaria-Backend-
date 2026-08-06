@@ -31,6 +31,10 @@ public class PersonaService {
     }
 
     public PersonaResponseDTO guardar(PersonaRequestDTO requestDTO) {
+        if (personaRepository.existsByTipoDocumento_IdTipoDocAndNroDocumento(
+                requestDTO.getIdTipoDoc(), requestDTO.getNroDocumento())) {
+            throw new IllegalArgumentException("Ya existe una persona registrada con el tipo y número de documento ingresado.");
+        }
         Persona persona = personaMapper.toEntity(requestDTO);
         
         TipoDocumento td = new TipoDocumento();
@@ -44,6 +48,11 @@ public class PersonaService {
     public PersonaResponseDTO actualizar(Long id, PersonaRequestDTO requestDTO) {
             Persona personaExistente = personaRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Persona no encontrada con ID: " + id));
+
+            if (personaRepository.existsByTipoDocumento_IdTipoDocAndNroDocumentoAndIdPersonaNot(
+                requestDTO.getIdTipoDoc(), requestDTO.getNroDocumento(), id)) {
+            throw new IllegalArgumentException("Ya existe otra persona registrada con el mismo tipo y número de documento.");
+            }
 
             personaMapper.updateEntityFromDto(requestDTO, personaExistente);
 

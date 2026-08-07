@@ -27,9 +27,20 @@ public class PagoService {
     }
 
     public PagoResponseDTO guardar(PagoRequestDTO requestDTO){
+        boolean existePago = pagoRepository.existsByContrato_IdContratoAndMesCoberturaAndAnioCobertura(
+                requestDTO.getIdContrato(),
+                requestDTO.getMesCobertura(),
+                requestDTO.getAnioCobertura()
+        );
+
+        if (existePago) {
+            throw new IllegalArgumentException("Ya existe un pago registrado para este contrato en el período seleccionado (" + requestDTO.getMesCobertura() + "/" + requestDTO.getAnioCobertura() + ").");
+        }
+
         Pago pago = pagoMapper.toEntity(requestDTO);
         Contrato contrato = contratoRepository.findById(requestDTO.getIdContrato())
                 .orElseThrow(() -> new IllegalArgumentException("Contrato no encontrado con ID: " + requestDTO.getIdContrato()));
+        
         pago.setContrato(contrato);
         
         Pago pagoGuardado = pagoRepository.save(pago);
@@ -37,15 +48,34 @@ public class PagoService {
     }
 
     public PagoResponseDTO actualizar(Integer id, PagoRequestDTO requestDTO) {
-    Pago pagoExistente = pagoRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Pago no encontrado con ID: " + id));
+         Pago pagoExistente = pagoRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Pago no encontrado con ID: " + id));
 
-    Contrato contrato = contratoRepository.findById(requestDTO.getIdContrato())
-        .orElseThrow(() -> new RuntimeException("Contrato no encontrado con ID: " + requestDTO.getIdContrato()));
-    pagoMapper.updateEntityFromDto(requestDTO, pagoExistente);
-    pagoExistente.setContrato(contrato);
+            boolean existeOtroPago = pagoRepository.existsByContrato_IdContratoAndMesCoberturaAndAnioCoberturaAndIdPagoNot(
+                requestDTO.getIdContrato(),
+                requestDTO.getMesCobertura(),
+                requestDTO.getAnioCobertura(),
+                id
+            );
 
-    Pago pagoGuardado = pagoRepository.save(pagoExistente);
-    return pagoMapper.toResponseDTO(pagoGuardado);
+           if (existeOtroPago) {
+            throw new IllegalArgumentException("Ya existe otro pago registrado para este contrato en el período seleccionado (" + requestDTO.getMesCobertura() + "/" + requestDTO.getAnioCobertura() + ").");
+           }
+
+          Contrato contrato = contratoRepository.findById(requestDTO.getIdContrato())
+            .orElseThrow(() -> new RuntimeException("Contrato no encontrado con ID: " + requestDTO.getIdContrato()));
+        
+          pagoMapper.updateEntityFromDto(requestDTO, pagoExistente);
+          pagoExistente.setContrato(contrato);
+
+          Pago pagoGuardado = pagoRepository.save(pagoExistente);
+          return pagoMapper.toResponseDTO(pagoGuardado);
+    }
+
+    public void eliminar(Integer id) {
+    if (!pagoRepository.existsById(id)) {
+        throw new RuntimeException("El pago con ID " + id + " no existe.");
+    }
+    pagoRepository.deleteById(id);
     }
 }

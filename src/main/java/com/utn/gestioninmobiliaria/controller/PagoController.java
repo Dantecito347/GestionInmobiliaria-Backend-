@@ -33,4 +33,10 @@ public class PagoController {
         return ResponseEntity.ok(pagoActualizado);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarPago(@PathVariable Integer id) {
+        pagoService.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

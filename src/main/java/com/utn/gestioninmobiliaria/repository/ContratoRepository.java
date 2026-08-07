@@ -5,5 +5,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ContratoRepository extends JpaRepository<Contrato, Integer> {
-    
+    boolean existsByPropiedadIdPropiedadAndEstadoIgnoreCase(Integer idPropiedad, String estado);
+
+    boolean existsByPropiedadIdPropiedadAndEstadoIgnoreCaseAndIdContratoNot(Integer idPropiedad, String estado, Integer idContrato);
 }

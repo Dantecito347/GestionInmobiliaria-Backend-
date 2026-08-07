@@ -1,4 +1,5 @@
 package com.utn.gestioninmobiliaria.dto;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -14,6 +15,7 @@ public class ContratoRequestDTO {
     private LocalDate fechaFin;
 
     @NotNull(message = "El valor es obligatorio")
+    @DecimalMin(value = "0.01", message = "El valor del contrato debe ser mayor a 0")
     private BigDecimal valorInicial;
 
     private Integer idAjuste;

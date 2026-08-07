@@ -13,6 +13,8 @@ import com.utn.gestioninmobiliaria.entity.TipoAjuste;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -38,16 +40,26 @@ public class ContratoService {
 
     @Transactional 
     public ContratoResponseDTO guardar(ContratoRequestDTO requestDTO){
+        if (requestDTO.getValorInicial() == null || requestDTO.getValorInicial().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El valor inicial del contrato debe ser mayor a 0");
+        }
+
+        if (requestDTO.getFechaFin().isBefore(requestDTO.getFechaInicio())) {
+            throw new IllegalArgumentException("La fecha de fin no puede ser anterior a la fecha de inicio");
+        }
+
+        if (contratoRepository.existsByPropiedadIdPropiedadAndEstadoIgnoreCase(requestDTO.getIdPropiedad(), "Activo")) {
+            throw new IllegalArgumentException("La propiedad seleccionada ya tiene un contrato activo asignado");
+        }
+
         Contrato contrato = contratoMapper.toEntity(requestDTO);
         
         Persona inquilino = personaRepository.findById(requestDTO.getIdInquilino())
-                            .orElseThrow(() -> new IllegalArgumentException("Inquilino no encontrado con ID: " + requestDTO.getIdInquilino()));
-
+                .orElseThrow(() -> new IllegalArgumentException("Inquilino no encontrado con ID: " + requestDTO.getIdInquilino()));
         Propiedad propiedad = propiedadRepository.findById(requestDTO.getIdPropiedad())
-                              .orElseThrow(() -> new IllegalArgumentException("Propiedad no encontrada con ID: " + requestDTO.getIdPropiedad()));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Propiedad no encontrada con ID: " + requestDTO.getIdPropiedad()));
         TipoAjuste ajuste = tipoAjusteRepository.findById(requestDTO.getIdAjuste())
-        .orElseThrow(() -> new RuntimeException("Tipo de ajuste no encontrado"));                      
+                .orElseThrow(() -> new RuntimeException("Tipo de ajuste no encontrado"));                  
         
         contrato.setInquilino(inquilino);
         contrato.setPropiedad(propiedad);
@@ -61,6 +73,18 @@ public class ContratoService {
     public ContratoResponseDTO actualizar(Integer id, ContratoRequestDTO requestDTO) {
         Contrato contratoExistente = contratoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Contrato no encontrado con ID: " + id));
+
+        if (requestDTO.getValorInicial() == null || requestDTO.getValorInicial().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El valor inicial del contrato debe ser mayor a 0");
+        }
+
+        if (requestDTO.getFechaFin().isBefore(requestDTO.getFechaInicio())) {
+            throw new IllegalArgumentException("La fecha de fin no puede ser anterior a la fecha de inicio");
+        }
+
+        if (contratoRepository.existsByPropiedadIdPropiedadAndEstadoIgnoreCaseAndIdContratoNot(requestDTO.getIdPropiedad(), "Activo", id)) {
+            throw new IllegalArgumentException("La propiedad seleccionada ya tiene otro contrato activo asignado");
+        }
         
         if (contratoExistente.getObligaciones() != null) {
             contratoExistente.getObligaciones().clear();

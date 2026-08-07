@@ -5,5 +5,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PropiedadRepository extends JpaRepository<Propiedad, Integer> {
-    
+    boolean existsByDireccionIgnoreCase(String direccion);
+
+    boolean existsByDireccionIgnoreCaseAndIdPropiedadNot(String direccion, Integer idPropiedad);
+
 }

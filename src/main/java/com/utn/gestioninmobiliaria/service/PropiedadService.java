@@ -35,18 +35,23 @@ public class PropiedadService {
     }
 
     public PropiedadResponseDTO guardar(PropiedadRequestDTO requestDTO){
-        Propiedad propiedad = propiedadMapper.toEntity(requestDTO);
-        Persona propietario = personaRepository.findById(requestDTO.getIdPropietario()) 
-        .orElseThrow(() -> new RuntimeException("Propietario no encontrada con ID:" + requestDTO.getIdPropietario()));
+        String direccionLimpia = requestDTO.getDireccion() != null ? requestDTO.getDireccion().trim() : "";
 
+        if (propiedadRepository.existsByDireccionIgnoreCase(direccionLimpia)) {
+            throw new IllegalArgumentException("Ya existe una propiedad registrada en la dirección: " + direccionLimpia);
+        }
+
+        Propiedad propiedad = propiedadMapper.toEntity(requestDTO);
+        propiedad.setDireccion(direccionLimpia);
+        Persona propietario = personaRepository.findById(requestDTO.getIdPropietario()) 
+            .orElseThrow(() -> new RuntimeException("Propietario no encontrada con ID:" + requestDTO.getIdPropietario()));
         TipoInmueble tipo = tipoInmuebleRepository.findById(requestDTO.getIdTipo().intValue())
             .orElseThrow(() -> new RuntimeException("Tipo de Inmueble no encontrado con ID:" + requestDTO.getIdTipo()));
         propiedad.setTipoInmueble(tipo);
-
         Zona zona = zonaRepository.findById(requestDTO.getIdZona())
             .orElseThrow(() -> new RuntimeException("Zona no encontrada"));
         propiedad.setZonas(zona);
-        
+
         propiedad.setPropietario(propietario);
         Propiedad propiedadGuardada = propiedadRepository.save(propiedad);
         return propiedadMapper.toResponseDTO(propiedadGuardada);
@@ -55,22 +60,27 @@ public class PropiedadService {
     public PropiedadResponseDTO actualizar(Integer id, PropiedadRequestDTO requestDTO) {
         Propiedad propiedadExistente = propiedadRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Propiedad no encontrada con ID: " + id));
-        propiedadExistente.setDireccion(requestDTO.getDireccion());
+        String direccionLimpia = requestDTO.getDireccion() != null ? requestDTO.getDireccion().trim() : "";
+
+        if (propiedadRepository.existsByDireccionIgnoreCaseAndIdPropiedadNot(direccionLimpia, id)) {
+        throw new IllegalArgumentException("Ya existe otra propiedad registrada en la dirección: " + direccionLimpia);
+        }
+
+        propiedadExistente.setDireccion(direccionLimpia);
         propiedadExistente.setEstado(requestDTO.getEstado());
         propiedadExistente.setActivo(requestDTO.getActivo());
 
         Persona propietario = personaRepository.findById(requestDTO.getIdPropietario())
             .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));
         propiedadExistente.setPropietario(propietario);
-
         TipoInmueble tipo = tipoInmuebleRepository.findById(requestDTO.getIdTipo())
             .orElseThrow(() -> new RuntimeException("Tipo de Inmueble no encontrado"));
         propiedadExistente.setTipoInmueble(tipo);
         Zona zona = zonaRepository.findById(requestDTO.getIdZona())
             .orElseThrow(() -> new RuntimeException("Zona no encontrada"));
         propiedadExistente.setZonas(zona);
+
         Propiedad propiedadGuardada = propiedadRepository.save(propiedadExistente);
-        
         return propiedadMapper.toResponseDTO(propiedadGuardada);
     }
 

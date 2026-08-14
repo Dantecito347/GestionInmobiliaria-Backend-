@@ -4,12 +4,17 @@ import com.utn.gestioninmobiliaria.dto.LoginResponseDTO;
 import com.utn.gestioninmobiliaria.dto.RegisterRequestDTO;
 import com.utn.gestioninmobiliaria.entity.Usuario;
 import com.utn.gestioninmobiliaria.repository.UsuarioRepository;
+import com.utn.gestioninmobiliaria.service.EmailService;
+import com.utn.gestioninmobiliaria.service.UsuarioService;
 import com.utn.gestioninmobiliaria.security.JwtUtil;
 import com.utn.gestioninmobiliaria.service.AuthService;
+import com.utn.gestioninmobiliaria.dto.ForgotPasswordRequestDTO;
+import com.utn.gestioninmobiliaria.dto.ResetPasswordRequestDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Map;
 
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
@@ -20,16 +25,22 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private final UsuarioService usuarioService;
 
     public AuthController(
             UsuarioRepository usuarioRepository, 
             JwtUtil jwtUtil, 
             AuthService authService,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            EmailService emailService,
+            UsuarioService usuarioService) {
         this.usuarioRepository = usuarioRepository;
         this.jwtUtil = jwtUtil;
         this.authService = authService;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
+        this.usuarioService = usuarioService;
     }
 
     @PostMapping("/login")
@@ -71,6 +82,22 @@ public class AuthController {
             return ResponseEntity.ok(Map.of("message", respuesta));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequestDTO request) {
+      usuarioService.solicitarRecuperacionPassword(request.getEmail());
+      return ResponseEntity.ok(Map.of("message", "Si el correo está registrado, recibirás un enlace de recuperación."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequestDTO request) {
+      try {
+          usuarioService.restablecerPassword(request.getToken(), request.getNewPassword());
+          return ResponseEntity.ok(Map.of("message", "Contraseña restablecida con éxito."));
+        } catch (RuntimeException e) {
+           return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 }

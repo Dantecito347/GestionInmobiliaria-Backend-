@@ -1,4 +1,6 @@
 package com.utn.gestioninmobiliaria.entity;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -13,6 +15,15 @@ public class Usuario {
 
     @Column(name = "username", nullable = false, unique = true, length = 50)
     private String username;
+
+    @Column(name = "email", length = 100)
+    private String email;
+
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "reset_token_expiration")
+    private LocalDateTime resetTokenExpiration;
 
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;

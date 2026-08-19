@@ -90,4 +90,12 @@ public class PropiedadService {
         }
         propiedadRepository.deleteById(id);
     }
+
+    public List<PropiedadResponseDTO> buscarSugerencias(String termino) {
+    if (termino == null || termino.trim().isEmpty()) {
+        return obtenerTodas();
+    }
+    List<Propiedad> propiedades = propiedadRepository.buscarSugerencias(termino.trim());
+    return propiedadMapper.toResponseDTOList(propiedades);
+    }
 }

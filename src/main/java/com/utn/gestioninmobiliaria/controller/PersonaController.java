@@ -23,6 +23,12 @@ public class PersonaController {
         return personaService.obtenerTodas();
     }
 
+    @GetMapping("/sugerencias")
+    public List<PersonaResponseDTO> buscarSugerencias(
+            @RequestParam(name = "termino", defaultValue = "") String termino) {
+        return personaService.buscarSugerencias(termino);
+    }
+
     @PostMapping
     public PersonaResponseDTO crearPersona(@Valid @RequestBody PersonaRequestDTO requestDTO) {
         return personaService.guardar(requestDTO);

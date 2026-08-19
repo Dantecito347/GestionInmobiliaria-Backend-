@@ -8,7 +8,11 @@ import com.utn.gestioninmobiliaria.mapper.PersonaMapper;
 import com.utn.gestioninmobiliaria.repository.PersonaRepository;
 import com.utn.gestioninmobiliaria.service.PersonaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -69,5 +73,16 @@ public class PersonaService {
             throw new RuntimeException("Persona no encontrada con ID: " + id);
         }
         personaRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PersonaResponseDTO> buscarSugerencias(String termino) {
+        if (termino == null || termino.trim().length() < 2) {
+            return Collections.emptyList();
+        }
+
+        Pageable limite = PageRequest.of(0, 10);
+        List<Persona> personas = personaRepository.buscarSugerencias(termino.trim(), limite);
+        return personaMapper.toResponseDTOList(personas);
     }
 }

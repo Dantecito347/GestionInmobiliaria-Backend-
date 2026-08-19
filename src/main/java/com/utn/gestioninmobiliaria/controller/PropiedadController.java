@@ -38,4 +38,10 @@ public class PropiedadController {
         propiedadService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/sugerencias")
+    public List<PropiedadResponseDTO> buscarSugerencias(
+            @RequestParam(name = "termino", defaultValue = "") String termino) {
+        return propiedadService.buscarSugerencias(termino);
+    }
 }

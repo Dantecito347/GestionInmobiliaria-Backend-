@@ -147,14 +147,15 @@ INSERT INTO propiedades (
     id_tipo,
     id_zona,
     estado,
-    activo
+    activo,
+    imagen_url
 ) VALUES
-(1, 'Av. Siempre Viva 123', 1, 1, 1, 'Reservada', 1),
-(2, 'Calle Falsa 456', 2, 2, 2, 'Ocupada', 1),
-(3, 'Av. Mitre 1425', 3, 3, 1, 'Reservada', 1),
-(4, 'Alem 2450', 6, 4, 4, 'Ocupada', 1),
-(5, 'Dorrego 1372', 5, 1, 5, 'Ocupada', 1),
-(9, 'San Martin 623', 13, 2, 3, 'Disponible', 1);
+(1, 'Av. Siempre Viva 123', 1, 1, 1, 'Reservada', 1, '/uploads/propiedades/c3b0c97a-dfdd-4e85-9970-9b846f507e68_Casita1.jpg'),
+(2, 'Calle Falsa 456', 2, 2, 2, 'Ocupada', 1, '/uploads/propiedades/42003924-dd70-44f2-a859-34073e51.jpg'),
+(3, 'Av. Mitre 1425', 3, 3, 1, 'Reservada', 1, '/uploads/propiedades/7ba11f48-7474-4ec7-a532-3c00fcd77.jpg'),
+(4, 'Alem 2450', 6, 4, 4, 'Ocupada', 1, NULL),
+(5, 'Dorrego 1372', 5, 1, 5, 'Ocupada', 1, NULL),
+(9, 'San Martin 623', 13, 2, 3, 'Disponible', 1, NULL);
 
 
 CREATE TABLE contratos (
@@ -186,7 +187,8 @@ INSERT INTO contratos (
 (2, 3, 2, '2026-02-01', '2027-01-31', 75000.00, 2, 'Activo'),
 (3, 1, 3, '2026-08-04', '2027-02-04', 70000.00, 1, 'Activo'),
 (4, 5, 4, '2026-08-05', '2027-01-05', 67000.00, 1, 'Activo'),
-(5, 3, 5, '2026-08-07', '2027-02-07', 80000.00, 1, 'Activo');
+(5, 3, 5, '2026-08-07', '2027-02-07', 80000.00, 1, 'Activo'),
+(8, 12, 9, '2026-08-29', '2026-12-29', 80000.00, 1, 'Activo');
 
 CREATE TABLE obligaciones (
     id_obligacion INT AUTO_INCREMENT PRIMARY KEY,
@@ -239,3 +241,22 @@ INSERT INTO pagos (
 (1, 1, 1, 2026, 50000.00, 50000.00, '2026-01-10', 'Pagado'),
 (3, 2, 2, 2026, 75000.00, 75000.00, '2026-02-15', 'Pagado'),
 (4, 4, 8, 2026, 50000.00, 150000.00, '2026-08-04', 'Atrasado');
+
+CREATE TABLE notificaciones (
+    id_notificacion INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    titulo VARCHAR(100) NOT NULL,
+    mensaje VARCHAR(255) NOT NULL,
+    tipo VARCHAR(50) NOT NULL,
+    leida BOOLEAN DEFAULT FALSE,
+    ruta_destino VARCHAR(100),
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
+);
+
+INSERT INTO notificaciones (id_notificacion, id_usuario, titulo, mensaje, tipo, leida, ruta_destino, fecha_creacion) 
+VALUES 
+(1, 1, 'Contrato Próximo a Vencer', 'El contrato de la propiedad Av. Siempre Viva 123 vence pronto.', 'ALERTA', 0, '/contratos', '2026-08-28 11:46:43'),
+(2, 1, 'Nueva Propiedad Registrada', 'Se ha dado de alta la propiedad en San Martin 623.', 'PROPIEDAD', 0, '/propiedades', '2026-08-28 11:46:43'),
+(3, 1, 'Pago Atrasado', 'El contrato #4 registra un estado de pago atrasado.', 'PAGO', 1, '/pagos', '2026-08-28 11:46:43'),
+(4, 2, 'Bienvenido al Sistema', 'Tu cuenta de Agente Inmobiliario ha sido configurada correctamente.', 'INFO', 0, '/dashboard', '2026-08-28 11:46:43');

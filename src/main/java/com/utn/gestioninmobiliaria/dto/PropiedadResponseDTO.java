@@ -7,6 +7,7 @@ public class PropiedadResponseDTO {
     private String direccion;
     private String estado;
     private Boolean activo;
+    private String imagenUrl;
     private Long idPropietario;
     private String nombrePropietario;
     private String apellidoPropietario;

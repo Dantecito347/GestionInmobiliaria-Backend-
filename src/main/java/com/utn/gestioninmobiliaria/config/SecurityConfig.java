@@ -33,12 +33,14 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                     "/api/personas/**",
                     "/api/propiedades/**", 
                     "/api/tipos-inmueble/**", 
-                    "/api/zonas/**"
+                    "/api/zonas/**",
+                    "/api/notificaciones/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

@@ -11,7 +11,11 @@ import com.utn.gestioninmobiliaria.repository.PersonaRepository;
 import com.utn.gestioninmobiliaria.repository.ZonaRepository;
 import com.utn.gestioninmobiliaria.mapper.PropiedadMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class PropiedadService {
@@ -20,6 +24,8 @@ public class PropiedadService {
     private final TipoInmuebleRepository tipoInmuebleRepository;
     private final ZonaRepository zonaRepository;
     private final PropiedadMapper propiedadMapper;
+
+    private final String UPLOAD_DIR = "uploads/propiedades/";
 
     public PropiedadService(PropiedadRepository propiedadRepository, PersonaRepository personaRepository, PropiedadMapper propiedadMapper, TipoInmuebleRepository tipoInmuebleRepository, ZonaRepository zonaRepository) {
         this.propiedadRepository = propiedadRepository;
@@ -34,7 +40,7 @@ public class PropiedadService {
         return propiedadMapper.toResponseDTOList(propiedades);
     }
 
-    public PropiedadResponseDTO guardar(PropiedadRequestDTO requestDTO){
+    public PropiedadResponseDTO guardar(PropiedadRequestDTO requestDTO, MultipartFile imagen){
         String direccionLimpia = requestDTO.getDireccion() != null ? requestDTO.getDireccion().trim() : "";
 
         if (propiedadRepository.existsByDireccionIgnoreCase(direccionLimpia)) {
@@ -43,6 +49,12 @@ public class PropiedadService {
 
         Propiedad propiedad = propiedadMapper.toEntity(requestDTO);
         propiedad.setDireccion(direccionLimpia);
+        
+        if (imagen != null && !imagen.isEmpty()) {
+            String rutaImagen = guardarArchivo(imagen);
+            propiedad.setImagenUrl(rutaImagen);
+        }
+
         Persona propietario = personaRepository.findById(requestDTO.getIdPropietario()) 
             .orElseThrow(() -> new RuntimeException("Propietario no encontrada con ID:" + requestDTO.getIdPropietario()));
         TipoInmueble tipo = tipoInmuebleRepository.findById(requestDTO.getIdTipo().intValue())
@@ -57,23 +69,28 @@ public class PropiedadService {
         return propiedadMapper.toResponseDTO(propiedadGuardada);
     }
 
-    public PropiedadResponseDTO actualizar(Integer id, PropiedadRequestDTO requestDTO) {
+    public PropiedadResponseDTO actualizar(Integer id, PropiedadRequestDTO requestDTO, MultipartFile imagen) {
         Propiedad propiedadExistente = propiedadRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Propiedad no encontrada con ID: " + id));
         String direccionLimpia = requestDTO.getDireccion() != null ? requestDTO.getDireccion().trim() : "";
 
         if (propiedadRepository.existsByDireccionIgnoreCaseAndIdPropiedadNot(direccionLimpia, id)) {
-        throw new IllegalArgumentException("Ya existe otra propiedad registrada en la dirección: " + direccionLimpia);
+            throw new IllegalArgumentException("Ya existe otra propiedad registrada en la dirección: " + direccionLimpia);
         }
 
         propiedadExistente.setDireccion(direccionLimpia);
         propiedadExistente.setEstado(requestDTO.getEstado());
         propiedadExistente.setActivo(requestDTO.getActivo());
 
+        if (imagen != null && !imagen.isEmpty()) {
+            String nuevaRuta = guardarArchivo(imagen);
+            propiedadExistente.setImagenUrl(nuevaRuta);
+        }
+
         Persona propietario = personaRepository.findById(requestDTO.getIdPropietario())
             .orElseThrow(() -> new RuntimeException("Propietario no encontrado"));
         propiedadExistente.setPropietario(propietario);
-        TipoInmueble tipo = tipoInmuebleRepository.findById(requestDTO.getIdTipo())
+        TipoInmueble tipo = tipoInmuebleRepository.findById(requestDTO.getIdTipo().intValue())
             .orElseThrow(() -> new RuntimeException("Tipo de Inmueble no encontrado"));
         propiedadExistente.setTipoInmueble(tipo);
         Zona zona = zonaRepository.findById(requestDTO.getIdZona())
@@ -97,5 +114,22 @@ public class PropiedadService {
     }
     List<Propiedad> propiedades = propiedadRepository.buscarSugerencias(termino.trim());
     return propiedadMapper.toResponseDTOList(propiedades);
+    }
+
+    private String guardarArchivo(MultipartFile imagen) {
+        try {
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            String nombreUnico = UUID.randomUUID().toString() + "_" + imagen.getOriginalFilename();
+            Path filePath = uploadPath.resolve(nombreUnico);
+            Files.copy(imagen.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            return "/uploads/propiedades/" + nombreUnico;
+        } catch (IOException e) {
+            throw new RuntimeException("Error al guardar el archivo de imagen: " + e.getMessage(), e);
+        }
     }
 }

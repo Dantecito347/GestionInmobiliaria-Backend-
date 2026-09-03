@@ -31,4 +31,7 @@ public class Propiedad {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_zona")
     private Zona zonas;
+
+    @Column(name = "imagen_url", length = 255)
+    private String imagenUrl;
 }

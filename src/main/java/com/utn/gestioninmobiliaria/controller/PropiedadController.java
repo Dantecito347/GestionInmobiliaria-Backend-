@@ -3,9 +3,10 @@ import com.utn.gestioninmobiliaria.dto.PropiedadRequestDTO;
 import com.utn.gestioninmobiliaria.dto.PropiedadResponseDTO;
 import com.utn.gestioninmobiliaria.service.PropiedadService;
 import jakarta.validation.Valid;
-
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
@@ -22,14 +23,19 @@ public class PropiedadController {
         return propiedadService.obtenerTodas();
     }
 
-    @PostMapping
-    public PropiedadResponseDTO crearPropiedad(@Valid @RequestBody PropiedadRequestDTO requestDTO) {
-        return propiedadService.guardar(requestDTO);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public PropiedadResponseDTO crearPropiedad(
+            @Valid @RequestPart("propiedad") PropiedadRequestDTO requestDTO,
+            @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        return propiedadService.guardar(requestDTO, imagen);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<PropiedadResponseDTO> actualizarPropiedad(@PathVariable Integer id, @Valid @RequestBody PropiedadRequestDTO requestDTO) {
-        PropiedadResponseDTO propiedadActualizada = propiedadService.actualizar(id, requestDTO);
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PropiedadResponseDTO> actualizarPropiedad(
+            @PathVariable Integer id,
+            @Valid @RequestPart("propiedad") PropiedadRequestDTO requestDTO,
+            @RequestPart(value = "imagen", required = false) MultipartFile imagen) {
+        PropiedadResponseDTO propiedadActualizada = propiedadService.actualizar(id, requestDTO, imagen);
         return ResponseEntity.ok(propiedadActualizada);
     }
 

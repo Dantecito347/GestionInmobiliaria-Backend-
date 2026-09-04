@@ -1,0 +1,111 @@
+# Sistema de Gestión Inmobiliaria 
+
+Sistema web integral para la administración de alquileres, propiedades, clientes y control de pagos/obligaciones contractuales. Diseñado para optimizar las operaciones diarias de una agencia inmobiliaria.
+
+---
+
+## Arquitectura del Proyecto
+
+El proyecto está dividido en un esquema decoupled (Backend REST Client / Frontend SPA):
+
+- *Backend:* Java Spring Boot con arquitectura en capas (Controller -> Service -> Repository -> Entity / DTOs).
+- *Frontend:* React (Vite) con Context API para gestión de temas y Axios para peticiones HTTP.
+- *Base de Datos:* MySQL (Relacional con claves foráneas e integridad referencial).
+- *Seguridad:* Autenticación y Autorización basada en JWT (JSON Web Tokens) + Spring Security.
+
+---
+
+##  Tecnologías Utilizadas
+
+ Capa  Tecnología 
+ 
+ *Backend*  Java, Spring Boot, Spring Security, Spring Data JPA, JWT, MapStruct 
+ *Frontend* React, Vite, Axios, CSS Modules 
+ *Base de Datos*  MySQL 
+ *Herramientas*  Maven, XAMPP, VS Code 
+
+---
+
+## Estructura del Proyecto
+
+### Backend (/GestionInmobiliaria-Backend)
+
+* config/: Configuraciones globales de CORS, excepciones y seguridad.
+* controller/: Endpoints REST que gestionan las peticiones HTTP.
+* dto/: Objetos de transferencia de datos para desacoplar las entidades de la API.
+* entity/: Mapeo JPA de las tablas de la base de datos.
+* mapper/: Interfaces MapStruct para la conversión Entity <-> DTO.
+* repository/: Capa de persistencia (Spring Data JPA).
+* security/: Filtros y utilidades JWT.
+* service/: Lógica de negocio de la aplicación.
+
+### Frontend (/GestionInmobiliaria-Frontend)
+
+* api/: Instancia configurada de Axios.
+* components/: Modales y componentes reutilizables.
+* context/: Proveedores de contexto global (ej. ThemeContext).
+* pages/: Vistas principales (Contratos, Pagos, Personas, Propiedades, etc.).
+* services/: Módulos de consumo de endpoints.
+
+---
+
+## Modelo de Base de Datos
+
+El esquema abarca el ciclo completo de alquileres:
+
+[Perfiles] ──1:N──> [Usuarios] ── N:1 ──> [Personas] <── 1:N ── [Propiedades]
+│                      │
+1:N                    1:N
+│                      │
+└───> [Contratos] <────┘
+│   │
+1:N 1:N
+│   │
+▼   ▼
+[Obligaciones] [Pagos]
+
+---
+
+## Configuración e Instalación
+
+### Requisitos Previos
+
+- Java JDK 17 o superior
+- Node.js 18+ y npm
+- MySQL (vía XAMPP o standalone)
+
+### 1. Base de Datos
+
+1. Inicia Apache y MySQL en XAMPP.
+2. Crea la base de datos ejecutando el script ubicado en:
+   src/main/java/com/utn/gestioninmobiliaria/database/script.sql
+
+### 2. Backend Setup
+
+Configura tus credenciales de base de datos en src/main/resources/application.properties:
+
+   ```properties
+   spring.datasource.url=jdbc:mysql://localhost:3306/gestion_inmobiliaria
+   spring.datasource.username=tu_usuario
+   spring.datasource.password=tu_contraseña
+
+
+Ejecuta la aplicación mediante Maven: ./mvnw spring-boot:run 
+   El servidor iniciará por defecto en http://localhost:8080
+   
+### Frontend Setup
+Clona/ubícate en la carpeta del frontend e instala dependencias: npm install
+Inicia el servidor de desarrollo: npm run dev
+
+### Funcionalidades Principales
+Seguridad & Roles: Roles de Administrador/Gerente y Agente Inmobiliario.
+
+Gestión de Personas: Registro de propietarios e inquilinos con validación de documentos y CUIT/CUIL.
+
+Administración de Propiedades: Control de estados (Disponible, Ocupada, Reservada) por zonas e inmuebles.
+
+Contratos: Gestión del período, valor inicial y esquemas de ajuste (Trimestral, Semestral, etc.).
+
+Control de Obligaciones y Pagos: Seguimiento de expensas, impuestos y cálculo de estado del pago (Pagado, Atrasado).
+
+Recuperación de Claves: Flujo vía token por correo electrónico (EmailService).

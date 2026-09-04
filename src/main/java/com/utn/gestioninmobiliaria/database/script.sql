@@ -134,6 +134,7 @@ CREATE TABLE propiedades (
     id_zona INT NOT NULL,
     estado VARCHAR(50) DEFAULT NULL,
     activo TINYINT(1) DEFAULT 1,
+    imagen_url VARCHAR(255) DEFAULT NULL,
 
     FOREIGN KEY (id_propietario) REFERENCES personas(id_persona),
     FOREIGN KEY (id_tipo) REFERENCES tipos_inmueble(id_tipo),

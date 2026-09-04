@@ -123,8 +123,8 @@ INSERT INTO usuarios (
     reset_token,
     reset_token_expiration
 ) VALUES
-(1, 'admin', '$2a$10$8vOYZMAaqpHcNeg67SgDvu0IJqm3rsUznRYqfDYZ545sA4bl71lNy', 1, 1, 1, 'dantecoz18@gmail.com', '4690b55a-8a57-4fc1-ad1c-22f510c71e38', '2026-08-15 21:24:50.000000'),
-(2, 'agente1', '$2y$10$aTvaGa382HBRI6dYcT91ZeKgboqb0fopY4WeziisKS9awD0XTLHvS', 2, 2, 1, 'agente1@mail.com', NULL, NULL);
+(1, 'admin', '$2y$10$MmymrjDzSLYnw5SqDhVhzefZcIlZoM8Vl1d5JDO5hZF7yAS6Oyg0y', 1, 1, 1, 'dantecoz18@gmail.com', '4690b55a-8a57-4fc1-ad1c-22f510c71e38', '2026-08-15 21:24:50.000000'),
+(2, 'agente1', '$2y$10$1kWiIl.cTj44Fr6p7VXt1u7KX84gLSYn2AV4hcc9z2nAFp684RK2e', 2, 2, 1, 'agente1@mail.com', NULL, NULL);
 
 CREATE TABLE propiedades (
     id_propiedad INT AUTO_INCREMENT PRIMARY KEY,
